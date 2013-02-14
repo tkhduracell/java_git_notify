@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="git-notify" default="build" basedir=".">
+    <property name="name" value="git-notify"/>
+    
+    <property name="jars" value="../jars"/>
+    <property name="src" value="../src"/>
+    <property name="lib" value="../lib"/>
+    
+    <target name="clean">
+        <delete verbose="true" failonerror="false">
+            <fileset dir="${jars}"/>
+        </delete>
+    </target>
+    
+    <target name="prepare" depends="clean">
+        <mkdir dir="${jars}"/>
+        <mkdir dir="${jars}/bin"/>
+    </target>
+    
+    <target name="compile" depends="prepare">
+        <javac destdir="${jars}/bin" 
+               deprecation="on" includeantruntime="false" 
+               classpath="${lib}/commons-codec-1.4.jar:${lib}/commons-collections-3.2.1.jar:${lib}/commons-io-2.0.1.jar:${lib}/commons-lang-2.6.jar:${lib}/commons-logging-1.1.1.jar:${lib}/httpclient-4.1.2.jar:${lib}/httpcore-4.1.2.jar:${lib}/httpmime-4.1.2.jar:${lib}/json-smart-1.1.1.jar" 
+               source="1.7" target="1.7">
+            <src path="${src}"/>
+        </javac>
+    </target>
+    
+    <!--  Package the logic module  -->
+    <target name="build" depends="compile">
+        <tstamp>
+            <format property="timenow" pattern="yyyy.MM.dd-HHmm"/>
+        </tstamp>
+        
+        <manifest file="${jars}/${name}.MF">
+            <attribute name="Main-Class" value="com.feality.gitnotify.Main"/>
+        </manifest>
+        
+        <jar jarfile="${jars}/${name}.jar" manifest="${jars}/${name}.MF">
+            <fileset dir="${jars}/bin">
+                <include name="**/**"/>
+                <include name="lib/**"/>
+            </fileset>
+            <fileset dir="../res">
+                <include name="**/**"/>
+            </fileset>
+            <zipgroupfileset dir="${lib}" includes="**/*.jar"/>
+        </jar>
+        
+        <delete verbose="false" failonerror="false" includeemptydirs="true">
+            <fileset dir="${jars}/bin"/>
+            <fileset file="${jars}/*.MF"/>
+        </delete>
+        <manifest file="${jars}/${timenow}.build">
+            <attribute name="time" value="${timenow}"/>
+        </manifest>
+    </target>
+</project>
